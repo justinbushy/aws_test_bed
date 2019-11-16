@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Nat Gateway for private subnet
+Parameters:
+  CIDRBlockParameter:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR Block for the VPC
+  VPCName:
+    Type: String
+    Default: Test-VPC
+    Description: Name of the VPC
+Resources:
+  TestVpc:
+    Type: AWS::EC2:VPC
+    Properties:
+      CidrBlock: 
+        Ref: CIDRBlockParameter
+      Tags:
+        - Key: Name
+          Value: VPCName
