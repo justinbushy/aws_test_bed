@@ -9,12 +9,27 @@ Parameters:
     Type: String
     Default: Test-VPC
     Description: Name of the VPC
+  PublicSubnetCIDR:
+    Type: String
+    Default: 10.0.0.0/24
 Resources:
   TestVpc:
-    Type: AWS::EC2:VPC
+    Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 
         Ref: CIDRBlockParameter
       Tags:
         - Key: Name
-          Value: VPCName
+          Value: 
+            Ref: VPCName
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: 
+        Ref: TestVpc
+      CidrBlock:
+        Ref: PublicSubnetCIDR
+      AvailabilityZone: "us-west-2a"
+      Tags:
+        - Key: Name
+          Value: "Test-VPC-Public-Subnet"
