@@ -12,6 +12,9 @@ Parameters:
   PublicSubnetCIDR:
     Type: String
     Default: 10.0.0.0/24
+  PrivateSubnetCIDR:
+    Type: String
+    Default: 10.0.1.0/24
 Resources:
   TestVpc:
     Type: AWS::EC2::VPC
@@ -36,6 +39,20 @@ Resources:
                     - ''
                     - - !Ref VPCName
                       - '-Public-Subnet'
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TestVpc
+      CidrBlock:
+        Ref: PrivateSubnetCIDR
+      AvailabilityZone: "us-west-2a"
+      Tags:
+        - Key: Name
+          Value: !Join
+                    - ''
+                    - - !Ref VPCName
+                      - '-Private-Subnet'
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -52,3 +69,64 @@ Resources:
         Ref: InternetGateway
       VpcId: 
         Ref: TestVpc
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: TestVpc
+      Tags:
+        - Key: Name
+          Value: !Join
+                    - ''
+                    - - !Ref VPCName
+                      - '-Public-Route-Table'
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet
+      RouteTableId:
+        Ref: PublicSubnetRouteTable
+  PublicSubnetIGRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      RouteTableId:
+        Ref: PublicSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  PrivateSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: TestVpc
+      Tags:
+        - Key: Name
+          Value: !Join
+                    - ''
+                    - - !Ref VPCName
+                      - '-Private-Route-Table'
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet
+      RouteTableId:
+        Ref: PrivateSubnetRouteTable
+Outputs:
+  StackVPC:
+    Description: The created VPC ID
+    Value: !Ref TestVpc
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCID"
+  PublicSubnetId:
+    Description: The public subnet ID
+    Value: !Ref PublicSubnet
+    Export:
+      Name: !Sub "${AWS::StackName}-Public-Subnet"
+  PrivateSubnetId:
+    Description: The private subnet ID
+    Value: !Ref PrivateSubnet
+    Export:
+      Name: !Sub "${AWS::StackName}-Private-Subnet"

@@ -1,8 +1,27 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Nat Gateway for private subnet
+Parameters:
+  VPCStackName:
+    Type: String
+    Default: Test-VPC
+    Description: The name of the stack that created the VPC
 Resources:
+  GatewayEIP:
+    Type: AWS::EC2::EIP
   NatGateway:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: eipalloc-029f8b7b35b446504
-      SubnetId: subnet-0987879b4bce79cd8
+      AllocationId:
+        Fn::GetAtt:
+          - GatewayEIP
+          - AllocationId
+      SubnetId:
+        Fn::ImportValue: 
+          !Sub "${VPCStackName}-Private-Subnet"
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - ""
+              - - Fn::ImportValue: !Sub "${VPCStackName}-VPCID"
+                - "-NAT"
