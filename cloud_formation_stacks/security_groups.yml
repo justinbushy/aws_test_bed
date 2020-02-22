@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Nat Gateway for private subnet
+Parameters:
+  VPCStackName:
+    Type: String
+    Default: Test-VPC
+    Description: The name of the stack that created the VPC
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH From Anywhere
+      VpcId:
+        Fn::ImportValue: !Sub "${VPCStackName}-VPCID"
+      Tags:
+        - Key: Name
+          Value: SSH-Public
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
